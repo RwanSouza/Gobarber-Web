@@ -12,11 +12,19 @@ import Button from '../../components/Button/index';
 
 import { Container, Content, Background } from './styles';
 
+interface SignUpFormData {
+  name: string;
+  email: string;
+  password: string;
+}
+
 const SignUp: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
 
-  const handleSubmit = useCallback(async (data: Record<string, any>) => {
+  const handleSubmit = useCallback(async (data: SignUpFormData) => {
     try {
+      formRef.current?.setErrors({});
+
       const schema = Yup.object().shape({
         name: Yup.string().required('Nome obrigatório'),
         email: Yup.string()
@@ -31,8 +39,11 @@ const SignUp: React.FC = () => {
         abortEarly: false,
       });
     } catch (err) {
-      const errors = getValidationErrors(err);
-      formRef.current?.setErrors(errors);
+      if (err instanceof Yup.ValidationError) {
+        const errors = getValidationErrors(err);
+
+        formRef.current?.setErrors(errors);
+      }
     }
   }, []);
 
